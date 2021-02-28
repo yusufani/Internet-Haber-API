@@ -1,134 +1,210 @@
-'''
-Example Queries for trt haber : https://github.com/prosman/TRT-Haber-Api
-http://www.trthaber.com/xml_mobile.php?tur=xml_genel&selectEx=okunmaadedi,yorumSay&id=HABERID_BURAYA_GELECEK&commentList=show
-http://www.trthaber.com/xml_mobile.php?tur=xml_genel&selectEx=okunmaadedi,yorumSay&id=HABERID_BURAYA_GELECEK&commentList=show
-### HABER LİSTELERİ
-Ana Sayfa Manşet
-http://www.trthaber.com/xml_mobile.php?tur=xml_genel&kategori=&adet=20&selectEx=yorumSay,okunmaadedi,anasayfamanset,kategorimanset
-Son Dakika Haberleri
-http://www.trthaber.com/xml_mobile.php?tur=xml_genel&kategori=sondakika&adet=20&selectEx=yorumSay,okunmaadedi,anasayfamanset,kategorimanset
-Spor Haberleri
-http://www.trthaber.com/xml_mobile.php?tur=xml_genel&kategori=spor&adet=20&selectEx=yorumSay,okunmaadedi,anasayfamanset,kategorimanset
-Gündem Haberleri
-http://www.trthaber.com/xml_mobile.php?tur=xml_genel&kategori=gundem&adet=20&selectEx=yorumSay,okunmaadedi,anasayfamanset,kategorimanset
-Ekonomi Haberleri
-http://www.trthaber.com/xml_mobile.php?tur=xml_genel&kategori=ekonomi&adet=20&selectEx=yorumSay,okunmaadedi,anasayfamanset,kategorimanset
-Dünya Haberleri
-http://www.trthaber.com/xml_mobile.php?tur=xml_genel&kategori=dunya&adet=20&selectEx=yorumSay,okunmaadedi,anasayfamanset,kategorimanset
-Sağlık Haberleri
-http://www.trthaber.com/xml_mobile.php?tur=xml_genel&kategori=saglik&adet=20&selectEx=yorumSay,okunmaadedi,anasayfamanset,kategorimanset
-Yaşam Haberleri
-http://www.trthaber.com/xml_mobile.php?tur=xml_genel&kategori=yasam&adet=20&selectEx=yorumSay,okunmaadedi,anasayfamanset,kategorimanset
-Spor Haberleri
-http://www.trthaber.com/xml_mobile.php?tur=xml_genel&kategori=spor&adet=20&selectEx=yorumSay,okunmaadedi,anasayfamanset,kategorimanset
-Kültür Sanat Haberleri
-http://www.trthaber.com/xml_mobile.php?tur=xml_genel&kategori=kultur-sanat&adet=20&selectEx=yorumSay,okunmaadedi,anasayfamanset,kategorimanset
-Eğitim Haberleri
-http://www.trthaber.com/xml_mobile.php?tur=xml_genel&kategori=egitim&adet=20&selectEx=yorumSay,okunmaadedi,anasayfamanset,kategorimanset
-Türkiye Haberleri
-http://www.trthaber.com/xml_mobile.php?tur=xml_genel&kategori=turkiye&adet=20&selectEx=yorumSay,okunmaadedi,anasayfamanset,kategorimanset
-'''
-# %%
+#!/usr/bin/env python
+# coding: utf-8
 
-import requests
+# In[2]:
 
 
-# %%
-class TrtAPI:
-    def __init__(self):
-        self.arguments = {"comment_count": "yorumSay", "read_count": "okunmaadedi", "headline_count": "anasayfamanset",
-                          "category_headline": "kategorimanset"}
-
-    def make_query(self, category, news_count=20, arguments=None):
-
-        query = "http://www.trthaber.com/xml_mobile.php?tur=xml_genel&kategori={}&adet={}&selectEx=".format(category,
-                                                                                                            news_count)
-        if arguments is None:
-            args = self.arguments.values()
-        else:
-            args = [self.arguments[key] for key in arguments]
-        query += ",".join(args)
-        return requests.get(query).text
+import pandas as pd
+import numpy as np
+from bs4 import BeautifulSoup as bs
+import requests 
+import datetime
+from progressbar import *
+from IPython.display import clear_output
 
 
-# %%
-from xml.dom import minidom
+# # Makalelerin Linklerinin Çekilmesi
 
-'''
-  <haber>
-        		<haber_manset><![CDATA[Başkentte 326 eğitim tesisi açılacak]]></haber_manset>
-        		<haber_resim>https://trthaberstatic.cdn.wp.trt.com.tr/resimler/1474000/cocuk-kitap-1475375.jpg</haber_resim>
-                <haber_link>haber/gundem/baskentte-326-egitim-tesisi-acilacak-558731.html</haber_link>
-        		<haber_id>558731</haber_id>
-        		<haber_video></haber_video>
-        		<haber_aciklama><![CDATA[Ankara Valisi Vasip Şahin, 326 eğitim tesisi açılışının yapılacağını duyurdu.]]></haber_aciklama>
-        		<haber_metni><![CDATA[<p>
-	<a href="https://www.trthaber.com/etiket/ankara/" target="_blank">Ankara</a> Valisi Vasip Şahin, sosyal meyda hesabından başkentte açılacak eğitim tesisleriyle ilgili paylaşım yaptı.</p>
-<p>
-	Vali Şahin, 2019-2020 yıllarında yapımı tamamlanan eğitim tesislerinin saat 13.00'te açılışının yapılacağını açıkladı.</p>
-<p>
-	Vasip Şahin, paylaşımında, "Sayın Cumhurbaşkanımız tarafından, video konferans yöntemiyle üç ayrı noktadaki okullarımıza bağlanarak toplu açılışları yapılacak olan 326 eğitim tesisi Ankara’ya hayırlı olsun" sözlerine yer verdi. </p>
-<p>
-	 </p>
-<blockquote class="twitter-tweet">
-	<p dir="ltr" lang="tr">
-		Sayın Cumhurbaşkanımız tarafından, video konferans yöntemiyle üç ayrı noktadaki okullarımıza bağlanarak toplu açılışları yapılacak olan 326 eğitim tesisi Ankara’ya hayırlı olsun. <a href="https://t.co/aeisvSQnwI">https://t.co/aeisvSQnwI</a></p>
-	— Vasip Şahin (@vasipsahin) <a href="https://twitter.com/vasipsahin/status/1363965548204339201?ref_src=twsrc%5Etfw">February 22, 2021</a></blockquote>
-<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script><p>
-	 </p>
-<p>
-	Açılacak eğitim tesislerinin arasında anaokulu, ilkokul, ortaokul, atölye, spor salonu, bilim ve sanat merkezi, güzel sanatlar lisesi de bulunuyor.</p>
-]]></haber_metni>
-        		<haber_kategorisi>Eğitim</haber_kategorisi>
-        		<haber_tarihi>Tue, 2021-02-23 01:26:00</haber_tarihi>
-                <manset_resim>https://trthaberstatic.cdn.wp.trt.com.tr/resimler/1474000/cocuk-kitap-1475375.jpg</manset_resim>
-                <izles_id></izles_id>   
-                <yorumSay><![CDATA[0]]></yorumSay><okunmaadedi><![CDATA[0]]></okunmaadedi><anasayfamanset><![CDATA[0]]></anasayfamanset><kategorimanset><![CDATA[1]]></kategorimanset>     
-                    
-        	</haber>
-
-'''
-class Parser:
-    @staticmethod
-    def parse(query):
-        xmldoc = minidom.parseString(query)
-        itemlist = xmldoc.getElementsByTagName('haber')
-        print("Number of news taken : ", len(itemlist))
-        for haber in itemlist:
-            headline = Parser.get_news_headline(haber)
-            print(headline)
-    @staticmethod
-    def get_news_headline(data):
-        headline = data.getElementsByTagName('haber_manset')[0].firstChild.nodeValue
-        return headline
-    @staticmethod
-    def get_news_image(data):
-        pass
-    @staticmethod
-    def get_news_link(data):
-        "https: // www.trthaber.com /"
-        pass
-    @staticmethod
-    def get_news_id(data):
-        pass
-    @staticmethod
-    def get_news_summary(data):
-        pass
-    @staticmethod
-    def get_news_content(data):
-        pass
-    @staticmethod
-    def get_news_blockquote(data):
-        pass
-
-# %%
-api = TrtAPI()
-query = api.make_query("egitim")
-
-Parser.parse(query)
+# In[6]:
 
 
-# %%
-class News:
-    def __init__(self):
-        pass
+sections = ["https://www.internethaber.com/spor",
+            "https://www.internethaber.com/ekonomi",
+            "https://www.internethaber.com/dunya",
+            "https://www.internethaber.com/saglik",
+            "https://www.internethaber.com/magazin",
+            "https://www.internethaber.com/politika",
+            "https://www.internethaber.com/egitim",
+            "https://www.internethaber.com/saglik",
+            "https://www.internethaber.com/kultur-ve-sanat",
+            "https://www.internethaber.com/bilim-teknoloji"
+           ]
+
+#%%
+sections = ["https://www.internethaber.com/spor"]
+# In[7]:
+
+
+urls = []
+#Öncelikle bir Kategori seçiyoruz.
+for section in sections:
+    #Kategorinin içerisinde sırayla 100 sayfa gezineceğiz.
+    for i in range(1,2):
+        try:
+            #Öncelikle URL'imizi oluşturuyoruz. Örneğin;
+            #https://www.dunyahalleri.com/category/kultur-sanat/page/25
+            newurl = section+"?page={}".format(i)
+            print("News taken from page : " , newurl)
+            
+            #Url'nin içerisindeki bütün html dosyasını indiriyoruz.
+            html = requests.get(newurl).text
+            soup = bs(html, "lxml")
+
+            #Yukarıdaki şemadada görüldüğü gibi bütün makaleler bu element'in içerisinde yer alıyor.
+            #Bizde bütün makaleleri buradan tags adında bir değişkene topluyoruz.
+            tags = soup.findAll("div", class_="col-md-8 order-1 order-md-2")[0]
+            
+            #Sırayla bütün makalelere girip, href'in içerisindeki linki urls adlı listemize append ediyoruz.
+            for a in tags.find_all('a', href=True,class_="news-list left-image mb-md"):
+                print(a["href"])
+                urls.append((section.split("/")[-1],a['href']))
+        except IndexError as ie:
+            print("Böyle bir sayfa yok.",ie)
+            break
+        except Exception as e :
+            print(e.message)
+
+
+# In[5]:
+
+
+urldata = pd.DataFrame(urls)
+urldata.columns = ["Category","Link"]
+urldata.head()
+
+
+# In[7]:
+
+
+urldata = urldata.drop_duplicates()
+
+
+# In[8]:
+
+
+urldata.to_csv('urldata.csv')
+
+
+# # Linklerdeki Verilerin Çekilmesi
+
+# In[68]:
+
+
+def get_image(news_html):
+    html_url = news_html.findAll("div",class_="news-detail-featured-img img mb-sm")[0].findAll("a",href=True)[0]["href"]
+
+    print(html_url)
+
+    print("Image url " , html_url)
+
+
+def get_title(news_html):
+    pass
+
+
+def GetData(url):
+    try:
+        #Url içerisindeki html'i indiriyoruz.
+        #print(url)
+        html = requests.get(url).text
+        #print(html)
+        soup = bs(html, "html.parser")
+
+        #Belirlediğimiz element'in altındaki bütün p'leri seçiyoruz.
+        news_html = soup.findAll("div", class_="news-detail")[0]
+
+        image = get_image(news_html)
+        title = get_title(news_html)
+        content = get_content(news_html)
+        date = get_date(news_html)
+        summary = get_summary(news_html)
+
+
+        '''
+        #Body_text adındaki metni tek bir string üzerinde topluyoruz.
+        body_text_big = ""
+        for i in body_text:
+            body_text_big = body_text_big +i.text
+
+        #Başlığı ve zamanı'da element isimlerinden bu şekilde seçip, metinlerini alıyoruz.
+        header = soup.find("h1", class_="entry-title h1").text
+        timestamp = soup.find("span", class_="updated").text
+        
+        #Özetin bulunduğu element'in metin kısmını alıyoruz.
+        summarized = soup.find("div", class_="tldr-sumamry").text
+        return ((url,header,body_text_big,summarized,timestamp))
+        '''
+    #Link boş ise verilen hata üzerine Boş Data mesajını dönüyor.
+    except IndexError:
+        return ("Boş Data")
+    
+    #Eğer link haftalık özet ise özet kısmı olmadığından oraya haftalık özet yazıp, sonuçlar o şekilde dönüyor.
+    except AttributeError:
+        print("AttributeError")
+        return ((url,header,body_text_big,"Haftalık Özet",timestamp))
+
+
+# In[73]:
+
+bigdata = []
+for idx,link in enumerate(urldata.Link):
+    #clear_output(wait=True)
+    print("News Count : ",idx)
+    bigdata.append(GetData(link))
+
+# In[109]:
+
+
+bigdatax = pd.DataFrame(bigdata)
+bigdatax.drop([5,6,7],axis=1,inplace=True)
+bigdatax.drop(bigdatax[bigdatax[0]=="B"].index,axis=0,inplace=True)
+bigdatax.columns = ["Link","Başlık","Body_text","Summarized_Text","TimeStamp"]
+bigdatax = bigdatax.loc[bigdatax.Link.drop_duplicates().index]
+bigdatax.index = range(0,len(bigdatax))
+bigdatax.head()
+
+
+# In[108]:
+
+
+def Düzeltici(x):
+    if x[:20] == "Haber ÖzetiTam Sürüm":
+        return x[20:]
+    else:
+        return x
+
+
+# In[110]:
+
+
+bigdatax.Body_text = bigdatax.Body_text.apply(Düzeltici)
+
+
+# In[120]:
+
+
+droplist =[]
+for i in range(0,len(bigdatax)):
+    if bigdatax.loc[i].Body_text[:35] == 'Türkiye ve dünyadan güncel haberler':
+        droplist.append(i)
+    else:
+        continue
+
+
+# In[124]:
+
+
+bigdatax.drop(droplist,axis=0,inplace=True)
+
+
+# In[127]:
+
+
+bigdatax.to_excel("DunyaHalleri.xlsx", encoding="utf-16")
+
+
+# In[ ]:
+
+
+
+
