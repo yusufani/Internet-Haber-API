@@ -2,19 +2,18 @@ import requests
 from PIL import Image
 from bs4 import BeautifulSoup as bs
 import os
+import time
 OUTPUT_DICT = "Results"
 os.makedirs(OUTPUT_DICT,exist_ok =True)
 class InternetHaberParser:
-
     @staticmethod
-    def get_image(news_html,category):
+    def get_image(news_html,category,last_index):
 
         html_url = news_html.findAll("div", class_="news-detail-featured-img img mb-sm")[0].findAll("a", href=True)[0][
             "href"]
         if len(html_url) <1 :
-            return None
+            return None,None
         try:
-
             path = os.path.join(OUTPUT_DICT, "images")
             os.makedirs(path, exist_ok=True)
             path = os.path.join(path, category)
@@ -22,11 +21,12 @@ class InternetHaberParser:
             img = Image.open(requests.get(html_url, stream=True).raw)
             #print(html_url)
             #print(html_url.replace("/", "slash"))
-            img.save(os.path.join(path, html_url.replace("/", "_slash_").replace(":", "_ikinokta_")))
-            return os.path.join(path, html_url)
+            im_name =os.path.join(path, category+"_"+str(last_index)+".jpg")
+            img.save(im_name)
+            return im_name,html_url
         except Exception as e:
             print (e)
-            return None
+            return None,None
 
     @staticmethod
     def get_summary(news_html):
@@ -49,9 +49,11 @@ class InternetHaberParser:
     def get_title(news_html):
         title = news_html.findAll("h1", class_="news-detail__title")[0]
         return title.text
-
     @staticmethod
-    def parse_html(url,category):
+    def delete_unnecessary_whitespaces(text):
+        return " ".join(text.strip().split())
+    @staticmethod
+    def parse_html(url,category,last_index):
         try:
             
             print("Parsing html : ",url )
@@ -64,22 +66,27 @@ class InternetHaberParser:
             # Belirlediğimiz element'in altındaki bütün p'leri seçiyoruz.
             news_html = soup.findAll("div", class_="news-detail")[0]
 
-            image_path = InternetHaberParser.get_image(news_html,category)
+            image_path,image_link = InternetHaberParser.get_image(news_html,category,last_index)
             if image_path is not None:
 
                 # image.show()
 
                 date = InternetHaberParser.get_date(news_html)
-                print("Tarih: ",date)
+                #print("Tarih: ",date)
                 content = InternetHaberParser.get_content(news_html)
+                content = InternetHaberParser.delete_unnecessary_whitespaces(content)
                 #print("Content: ",content)
 
                 summary = InternetHaberParser.get_summary(news_html)
+                summary = InternetHaberParser.delete_unnecessary_whitespaces(summary)
+
                 print("Summary: ",summary)
                 title = InternetHaberParser.get_title(news_html)
-                print("title: ",title)
+                title = InternetHaberParser.delete_unnecessary_whitespaces(title)
+
+                #print("title: ",title)
                 print(50*"*")
-                return {"title":title, "summary":summary, "content":content, "image_path":image_path, "date":date }
+                return {"title":title, "summary":summary, "content":content, "image_path":image_path, "date":date,"image_link":image_link }
             else:
                 return None
 
@@ -92,3 +99,9 @@ class InternetHaberParser:
         except AttributeError as ae:
             print(ae)
             print("AttributeError")
+        except requests.exceptions.RequestException as e: 
+            print("Code waiting for block. ")
+            time.sleep(120)
+            print("Code contuining..")
+            return InternetHaberParser.parse_html(url,category)
+            

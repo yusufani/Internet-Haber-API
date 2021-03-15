@@ -18,14 +18,14 @@ print(stopWords)
 print(type(stopWords))
 def generate_wordcloud(text,column,filename):
     # Generate a word cloud image
-    wordcloud = WordCloud().generate(text)
+    #wordcloud = WordCloud().generate(text)
 
     # Display the generated image:
     # the matplotlib way:
 
-    plt.imshow(wordcloud, interpolation='bilinear')
-    plt.axis("off")
-    plt.savefig(os.path.join(OUTPATH,filename + '_' + column + "_zoom_in.png"))
+    #plt.imshow(wordcloud, interpolation='bilinear')
+    #plt.axis("off")
+    #plt.savefig(os.path.join(OUTPATH,filename + '_' + column + "_zoom_in.png"))
     
 
     # lower max_font_size
@@ -53,7 +53,9 @@ def remove_stop_words(text):
 def get_result_by_column(column,column_name,filename):
     text = ""
     for idx, val in column.iteritems():
-        text += val
+        #print(val)
+        if str(val) != "nan":
+            text += val
 
     text = remove_stop_words(text)
     generate_wordcloud(text,column_name,filename)
@@ -61,7 +63,7 @@ def get_result_by_column(column,column_name,filename):
 
 for csv_file in glob(DATA_PATH+os.sep+"*.csv"):
     print(csv_file)
-    data = pd.read_csv(csv_file,encoding="utf-8", sep="~")
+    data = pd.read_csv(csv_file,encoding="utf-8", sep="\t")
     get_result_by_column(data["title"],"title",csv_file.replace(".","_").split("_")[-2])
     get_result_by_column(data["summary"],"summary",csv_file.replace(".","_").split("_")[-2])
     get_result_by_column(data["content"],"content",csv_file.replace(".","_").split("_")[-2])

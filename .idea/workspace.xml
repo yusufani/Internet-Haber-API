@@ -20,14 +20,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="eafdabf2-6ea2-4237-b90c-7509ca1c9065" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/Internet-Haber-API.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/Trt-Haber-API.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/csv-plugin.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/csv-plugin.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/other.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/Internet-Haber-API.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Internet-Haber-API.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/InternetHaberParser.py" beforeDir="false" afterPath="$PROJECT_DIR$/InternetHaberParser.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/run_collect_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_collect_data.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -106,6 +101,9 @@
       <module name="Internet-Haber-API" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="C:\Users\Yusuf\anaconda3\python.exe" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="false" />
@@ -191,7 +189,8 @@
       <workItem from="1614866322907" duration="1996000" />
       <workItem from="1614974122014" duration="507000" />
       <workItem from="1614974635047" duration="3706000" />
-      <workItem from="1615055319738" duration="8039000" />
+      <workItem from="1615055319738" duration="17954000" />
+      <workItem from="1615220242065" duration="455000" />
     </task>
     <servers />
   </component>
